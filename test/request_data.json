@@ -1,0 +1,116 @@
+{
+  "originalRequest": {
+    "source": "google",
+    "version": "2",
+    "data": {
+      "isInSandbox": "True",
+      "surface": {
+        "capabilities": [
+          {
+            "name": "actions.capability.AUDIO_OUTPUT"
+          }
+        ]
+      },
+      "inputs": [
+        {
+          "rawInputs": [
+            {
+              "query": "next",
+              "inputType": "VOICE"
+            }
+          ],
+          "arguments": [
+            {
+              "rawText": "next",
+              "textValue": "next",
+              "name": "text"
+            }
+          ],
+          "intent": "actions.intent.TEXT"
+        }
+      ],
+      "user": {
+        "locale": "en-US",
+        "userId": "AETml1Sq1xTt58dagNk5a74HJWlS",
+        "accessToken": "Iqe30U5n5kLnJV3uowi1G37U7WNAc2"
+      },
+      "device": {},
+      "conversation": {
+        "conversationId": "1603559ac590dac3",
+        "type": "ACTIVE",
+        "conversationToken": "[mail]"
+      }
+    }
+  },
+  "id": "f5aba21c-ddd7-47c4-bd36-5faf50deb89f",
+  "timestamp": "2017-09-13T10:52:35.95Z",
+  "lang": "en",
+  "result": {
+    "source": "agent",
+    "resolvedQuery": "read",
+    "speech": "",
+    "action": "read",
+    "actionIncomplete": "False",
+    "parameters": {
+      "mailuid": "",
+      "offset": ""
+    },
+    "contexts": [
+      {
+        "name": "mail",
+        "parameters": {
+          "readingmode.original": "",
+          "folder": "Inbox",
+          "ReadFlag1.original": "",
+          "readingmode": "Folder",
+          "mailuid": "72633",
+          "folder.original": "",
+          "offset.original": "",
+          "ReadFlag1": "Unread",
+          "mailuid.original": ""
+        },
+        "lifespan": 5
+      },
+      {
+        "name": "actions_capability_audio_output",
+        "parameters": {
+          "mailuid": "72633",
+          "offset.original": "",
+          "mailuid.original": ""
+        },
+        "lifespan": 0
+      },
+      {
+        "name": "google_assistant_input_type_voice",
+        "parameters": {
+          "mailuid": "72633",
+          "offset.original": "",
+          "mailuid.original": ""
+        },
+        "lifespan": 0
+      }
+    ],
+    "metadata": {
+      "intentId": "c4c5dba2-f343-4b30-9c7a-43b1358612b8",
+      "webhookUsed": "True",
+      "webhookForSlotFillingUsed": "False",
+      "nluResponseTime": 13,
+      "intentName": "next"
+    },
+    "fulfillment": {
+      "speech": "",
+      "messages": [
+        {
+          "type": 0,
+          "speech": ""
+        }
+      ]
+    },
+    "score": 1.0
+  },
+  "status": {
+    "code": 200,
+    "errorType": "success"
+  },
+  "sessionId": "1505299929779"
+}

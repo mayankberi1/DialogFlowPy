@@ -1,0 +1,40 @@
+name = "DialogFlowPy"
+from enum import Enum
+
+
+class PlatformEnum(Enum):
+    PLATFORM_UNSPECIFIED = 'PLATFORM_UNSPECIFIED'
+    FACEBOOK = 'facebook'
+    SLACK = 'slack'
+    TELEGRAM = 'telegram'
+    KIK = 'kik'
+    SKYPE = 'skype'
+    LINE = 'line'
+    VIBER = 'viber'
+    ACTIONS_ON_GOOGLE = 'google'
+
+
+class ImageDisplayOptions(Enum):
+    IMAGE_DISPLAY_OPTIONS_UNSPECIFIED = 'IMAGE_DISPLAY_OPTIONS_UNSPECIFIED'
+    GRAY = 'GRAY'
+    WHITE = 'WHITE'
+    CROPPED = 'CROPPED'
+    BLURRED_BACKGROUND = 'BLURRED_BACKGROUND'
+
+
+class UrlTypeHint(Enum):
+    URL_TYPE_HINT_UNSPECIFIED = 'URL_TYPE_HINT_UNSPECIFIED'
+    AMP_ACTION = 'AMP_ACTION'
+    AMP_CONTENT = 'AMP_CONTENT'
+
+
+class ResponseMediaType(Enum):
+    RESPONSE_MEDIA_TYPE_UNSPECIFIED = 'RESPONSE_MEDIA_TYPE_UNSPECIFIED'
+    AUDIO = 'AUDIO'
+
+
+class HorizontalAlignment(Enum):
+    HORIZONTAL_ALIGNMENT_UNSPECIFIED = 'HORIZONTAL_ALIGNMENT_UNSPECIFIED'
+    LEADING = 'LEADING'
+    CENTER = 'CENTER'
+    TRAILING = 'TRAILING'
