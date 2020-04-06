@@ -1,6 +1,6 @@
 from typing import List
+
 from DialogFlowPy import PlatformEnum, ImageDisplayOptions, ResponseMediaType
-from GoogleActions import ImageDisplayOptions as GoogleImageDisplayOptions
 from DialogFlowPy.BasicCard import BasicCard
 from DialogFlowPy.BrowseCarouselCard import BrowseCarouselCard
 from DialogFlowPy.BrowseCarouselCardItem import BrowseCarouselCardItem
@@ -28,6 +28,7 @@ from DialogFlowPy.Suggestions import Suggestions
 from DialogFlowPy.TableCard import TableCard
 from DialogFlowPy.TableCardRow import TableCardRow
 from DialogFlowPy.Text import Text
+from GoogleActions import ImageDisplayOptions as GoogleImageDisplayOptions
 
 
 class DialogFlow(dict):
@@ -304,23 +305,23 @@ class DialogFlow(dict):
         for message in message_list:
             self.add_fulfillment_messages(message)
 
-    def add_fulfillment_messages(self, *messages: Message) -> List[Message]:
+    def add_fulfillment_messages(self, message: Message) -> List[Message]:
 
-        for message in messages:
-            print('adding fulfillment_message: ', type(message), message)
-            assert isinstance(message, Message)
+        print('adding fulfillment_message: ', type(message), message)
+        assert isinstance(message, Message)
 
+        # only add the message if its simple responses or if not then theres already a simple response in the
+        # fulfillment messages
+        if self.has_fulfillment_message_type(message.platform,
+                                             'simple_responses') or message.message_type == 'simple_responses':
             # check if the same type of message object already exists in the list,if yes then modify it or add a new one
-            if self.has_fulfillment_message_type(message.platform, message.message_type):
+            if self.has_fulfillment_message_type(message.platform,
+                                                 message.message_type) and message.message_type == 'payload':
                 self.get_fulfillment_message(message.platform, message.message_type).message_object = \
                     message.message_object
             else:
-                print('checking message validity before adding: ', type(message), message)
-                print('current messages: ', self.fulfillment_messages)
-                if self.check_message_validity(message):
-                    self.fulfillment_messages.append(message)
-                else:
-                    raise AssertionError
+                self.fulfillment_messages.append(message)
+
         return self['fulfillmentMessages']
 
     def delete_messages(self):
@@ -343,27 +344,6 @@ class DialogFlow(dict):
                 return message
 
         return KeyError()
-
-    def check_message_validity(self, *messages: Message) -> bool:
-
-        count_of_payload_messages = {}
-        for message in self.fulfillment_messages:
-            if message.message_type == 'payload':
-                if not count_of_payload_messages.get(message.platform):
-                    count_of_payload_messages[message.platform] = 0
-                count_of_payload_messages[message.platform] = count_of_payload_messages.get(message.platform, 0) + 1
-
-        for message in messages:
-            if message.message_type == 'payload':
-                count_of_payload_messages[message.platform] = count_of_payload_messages.get(message.platform, 0) + 1
-
-        print('count_of_payload_messages: ', count_of_payload_messages)
-
-        for payload_count in count_of_payload_messages.values():
-            if payload_count > 1:
-                return False
-
-        return True
 
     # Payload functions
     @property
