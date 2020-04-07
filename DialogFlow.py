@@ -1,5 +1,4 @@
-from typing import List
-
+from typing import List, Union
 from DialogFlowPy import PlatformEnum, ImageDisplayOptions, ResponseMediaType
 from DialogFlowPy.BasicCard import BasicCard
 from DialogFlowPy.BrowseCarouselCard import BrowseCarouselCard
@@ -354,6 +353,13 @@ class DialogFlow(dict):
     def payload(self, payload):
         assert isinstance(payload, Payload)
         self['payload'] = payload
+
+    def add_payload(self, payload: Union[GooglePayload, Payload]) -> Payload:
+        if isinstance(payload, Payload):
+            self.payload = payload
+        elif isinstance(payload, GooglePayload):
+            self.payload = Payload(payload_type='google', payload=payload)
+        return self.payload
 
     # Fulfillment_text functions
     @property

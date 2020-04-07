@@ -1,5 +1,4 @@
 from typing import List
-
 from DialogFlowPy import ImageDisplayOptions
 from GoogleActions import MediaType
 from GoogleActions.Button import Button
@@ -11,7 +10,8 @@ from GoogleActions.LinkOutSuggestion import LinkOutSuggestion
 from GoogleActions.MediaObject import MediaObject
 from GoogleActions.RichResponse import RichResponse
 from GoogleActions.Suggestion import Suggestion
-
+from GoogleActions import UrlTypeHint
+from GoogleActions import Permission
 from DialogFlowPy.BrowseCarouselCardItem import BrowseCarouselCardItem
 
 
@@ -30,8 +30,11 @@ class GooglePayload(dict):
                  system_intent: ExpectedIntent = None):
         super().__init__()
 
-        self['expectUserResponse'] = expect_user_response
-        self['richResponse'] = RichResponse()
+        if expect_user_response is not None:
+            self['expectUserResponse'] = expect_user_response
+
+        if rich_response is not None:
+            self['richResponse'] = RichResponse()
 
         if rich_response is not None:
             self['richResponse'] = rich_response
@@ -39,7 +42,8 @@ class GooglePayload(dict):
         if system_intent is not None:
             self['systemIntent'] = system_intent
 
-        self['userStorage'] = user_storage
+        if user_storage is not None:
+            self['userStorage'] = user_storage
 
     @property
     def expect_user_response(self):
@@ -66,12 +70,12 @@ class GooglePayload(dict):
         self['richResponse'] = value
 
     @property
-    def system_intent(self):
+    def system_intent(self) -> ExpectedIntent:
         return self.get('systemIntent')
 
     @system_intent.setter
-    def system_intent(self, value):
-        self['systemIntent'] = value
+    def system_intent(self, system_intent: ExpectedIntent):
+        self['systemIntent'] = system_intent
 
     def add_system_intent(self, intent: str = '', parameter_name: str = '', input_value: Extension = None) \
             -> ExpectedIntent:
@@ -175,7 +179,6 @@ class GooglePayload(dict):
         if self.rich_response is None:
             self['richResponse'] = RichResponse()
 
-        google_media_objects = [MediaObject]
         self.rich_response.add_media_response(media_type=media_type, media_objects=media_objects)
         return self.rich_response
 
@@ -195,3 +198,92 @@ class GooglePayload(dict):
             self['richResponse'] = RichResponse()
         self.rich_response.add_link_out_suggestion(url=url, destination_name=destination_name)
         return self.rich_response
+
+    # Helper intents
+
+    def request_confirmation(self, request_confirmation_text: str):
+        """
+        Obtain a confirmation from the user (for example, an answer to a yes or no question).
+        :return:  bool
+        """
+
+        self.system_intent.request_confirmation(request_confirmation_text=request_confirmation_text)
+
+        return self.system_intent
+
+    def request_date_time(self, date_time_text: str = '', date_text: str = '', time_text: str = ''):
+        """
+        Obtain a date and time input from the user.
+        :return: bool
+        """
+
+        self.system_intent.request_date_time(date_time_text=date_time_text, date_text=date_text, time_text=time_text)
+        return self.system_intent
+
+    def request_place(self):
+        """
+        Obtain an address or saved location from the user.
+        :return: bool
+        """
+        self.system_intent.request_place()
+        return self.system_intent
+
+    def request_delivery_address(self, reason: str = ''):
+        """
+        Obtain a delivery address input from the user.
+        :return: bool
+        """
+
+        self.system_intent.request_delivery_address(reason=reason)
+        return self.system_intent
+
+    def request_link(self, url: str = '', package_name: str = '', type_hint: UrlTypeHint = None,
+                     version_tuples: tuple = None):
+        """
+        Requests a deep link flow into another platform.
+        :return: bool
+        """
+        self.system_intent.request_link(url=url, package_name=package_name, type_hint=type_hint,
+                                        version_tuples=version_tuples)
+        return self.system_intent
+
+    def request_select_option(self):
+        """
+        Receive the selected item from a list or carousel UI.
+        :return: bool
+        """
+        self.system_intent.request_select_option()
+        return self.system_intent
+
+    def request_permission(self, opt_context_text: str = '', permissions: List[Permission] = None):
+        """
+        Obtain the user's full name, coarse location, or precise location, or all 3.
+        :return: bool
+        """
+
+        self.system_intent.request_permission(opt_context_text=opt_context_text, permissions=permissions)
+        return self.system_intent
+
+    def request_sign_in(self, opt_context_text: str = ''):
+        """
+        Requests an account linking flow to link a user's account.
+        :return: bool
+        """
+        self.system_intent.request_sign_in(opt_context_text=opt_context_text)
+        return self.system_intent
+
+    def request_new_surface(self):
+        self.system_intent.request_new_surface()
+        return self.system_intent
+
+    def request_transaction_requirements_check(self):
+        self.system_intent.request_transaction_requirements_check()
+        return self.system_intent
+
+    def request_transaction_decision(self):
+        self.system_intent.request_transaction_decision()
+        return self.system_intent
+
+    def request_register_update(self):
+        self.system_intent.request_register_update()
+        return self.system_intent

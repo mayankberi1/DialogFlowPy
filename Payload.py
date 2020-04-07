@@ -2,10 +2,8 @@ class Payload(dict):
 
     def __init__(self, payload_type: str = 'google', payload: dict = None) -> None:
         super().__init__()
-        if payload is None:
-            payload = dict()
 
-        self[payload_type] = payload
+        self[payload_type] = payload or dict()
 
     @property
     def payload(self):
