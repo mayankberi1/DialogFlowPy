@@ -1,4 +1,7 @@
+import json
+from ast import literal_eval
 from typing import List, Union
+
 from DialogFlowPy import PlatformEnum, ImageDisplayOptions, ResponseMediaType
 from DialogFlowPy.BasicCard import BasicCard
 from DialogFlowPy.BrowseCarouselCard import BrowseCarouselCard
@@ -28,6 +31,7 @@ from DialogFlowPy.TableCard import TableCard
 from DialogFlowPy.TableCardRow import TableCardRow
 from DialogFlowPy.Text import Text
 from GoogleActions import ImageDisplayOptions as GoogleImageDisplayOptions
+from google.auth import jwt
 
 
 class DialogFlow(dict):
@@ -168,7 +172,8 @@ class DialogFlow(dict):
     }
     """
 
-    def __init__(self, request_data_json: dict, version: str = 'v1', create_payload_object: bool = False):
+    def __init__(self, request_data_json: dict, version: str = 'v1', create_payload_object: bool = False,
+                 client_key: str = None):
         super().__init__()
 
         self._source = ''
@@ -184,16 +189,22 @@ class DialogFlow(dict):
         self['followupEventInput'] = None
         self['fulfillmentText'] = ''
 
+        self._user_given_name = ''
+        self._user_family_name = ''
+        self._user_email = ''
+        self._user_verification_status = ''
+        self._user_storage = {}
+
         if self.create_payload_object:
             self['payload'] = Payload('google', GooglePayload())
 
-        self.load_request_data(request_data_json=request_data_json, version=version)
+        self.load_request_data(request_data_json=request_data_json, version=version, client_key=client_key)
 
-    def load_request_data(self, request_data_json: dict, version: str = 'v1'):
+    def load_request_data(self, request_data_json: dict, version: str = 'v1', client_key: str = None):
 
         print('initializing Dialogflow with: ', version, request_data_json)
         assert isinstance(request_data_json, dict)
-        super(DialogFlow, self).__init__(request_data_json)
+        super(DialogFlow, self).__init__()
 
         self._session_id = request_data_json.get('session')
         print('session_id : ', self._session_id)
@@ -215,10 +226,62 @@ class DialogFlow(dict):
             self._source = request_data_json.get('originalDetectIntentRequest').get('source')
 
         self['outputContexts']: List[Context] = []
-        contexts = self._result.get('outputContexts') or self._result.get('contexts')
-        for context in contexts:
-            self['outputContexts'].append(Context(context.get('name')))
+        # contexts = self._result.get('outputContexts') or self._result.get('contexts')
+        # for context in contexts:
+        #    self['outputContexts'].append(Context(context.get('name')))
         print('outputContexts: ', self['outputContexts'])
+
+        if request_data_json.get('originalDetectIntentRequest'):
+            if request_data_json.get('originalDetectIntentRequest').get('payload'):
+                if request_data_json.get('originalDetectIntentRequest').get('payload').get('user'):
+
+                    self._user_verification_status = request_data_json.get('originalDetectIntentRequest').get(
+                        'payload').get('user').get('userVerificationStatus')
+
+                    self._user_storage = request_data_json.get('originalDetectIntentRequest').get(
+                        'payload').get('user').get('userStorage')
+
+                    if isinstance(self._user_storage, str):
+                        # converting user storage to string since its in
+                        self._user_storage = self._user_storage.replace('null', '""')
+                        self._user_storage = literal_eval(self._user_storage)
+
+                    if request_data_json.get('originalDetectIntentRequest').get('payload').get('user').get('idToken'):
+                        encoded_user_token: str = ''
+
+                        import http.client
+                        conn = http.client.HTTPSConnection("www.googleapis.com")
+                        conn.request("GET", "/oauth2/v1/certs")
+                        r1 = conn.getresponse()
+                        print(r1.status, r1.reason)
+                        certs = json.loads(r1.read().decode('utf-8'))  # This will return entire content.
+                        print(type(certs), certs)
+
+                        encoded_user_token = request_data_json.get('originalDetectIntentRequest').get('payload').get(
+                            'user').get('idToken')
+                        print('encoded_token: ', encoded_user_token)
+                        decoded_user_token = jwt.decode(encoded_user_token, certs=certs, verify=True,
+                                                        audience=client_key)
+                        print('decoded_token: ', decoded_user_token)
+                        self._user_given_name = decoded_user_token.get('given_name')
+                        self._user_family_name = decoded_user_token.get('family_name')
+                        self._user_email = decoded_user_token.get('email')
+
+    @property
+    def user_given_name(self):
+        return self._user_given_name
+
+    @property
+    def user_family_name(self):
+        return self._user_family_name
+
+    @property
+    def user_email(self):
+        return self._user_email
+
+    @property
+    def session_id(self):
+        return self._session_id
 
     @property
     def action(self):
@@ -227,6 +290,14 @@ class DialogFlow(dict):
     @property
     def parameters(self):
         return self._parameters
+
+    @property
+    def user_storage(self):
+        return self._user_storage
+
+    @property
+    def user_verification_status(self):
+        return self._user_verification_status
 
     # Source functions
     @property

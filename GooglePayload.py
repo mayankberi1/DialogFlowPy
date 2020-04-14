@@ -99,7 +99,6 @@ class GooglePayload(dict):
         return self.rich_response
 
     def add_simple_response(self, text_to_speech: str, ssml: str = '', display_text: str = ''):
-        print('richResponse', self['richResponse'])
         if self.rich_response is None:
             self['richResponse'] = RichResponse()
 
