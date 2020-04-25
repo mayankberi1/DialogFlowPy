@@ -1,37 +1,38 @@
 import json
 from ast import literal_eval
 from typing import List, Union
-
-from DialogFlowPy import PlatformEnum, ImageDisplayOptions, ResponseMediaType
-from DialogFlowPy.BasicCard import BasicCard
-from DialogFlowPy.BrowseCarouselCard import BrowseCarouselCard
-from DialogFlowPy.BrowseCarouselCardItem import BrowseCarouselCardItem
-from DialogFlowPy.Button import Button
-from DialogFlowPy.Card import Card
-from DialogFlowPy.CarouselItem import CarouselItem
-from DialogFlowPy.CarouselSelect import CarouselSelect
-from DialogFlowPy.ColumnProperties import ColumnProperties
-from DialogFlowPy.Context import Context
-from DialogFlowPy.EventInput import EventInput
-from DialogFlowPy.GooglePayload import GooglePayload
-from DialogFlowPy.Image import Image
-from DialogFlowPy.LinkOutSuggestion import LinkOutSuggestion
-from DialogFlowPy.ListItem import ListItem
-from DialogFlowPy.ListSelect import ListSelect
-from DialogFlowPy.MediaContent import MediaContent
-from DialogFlowPy.MediaObject import MediaObject
-from DialogFlowPy.Message import Message
-from DialogFlowPy.Payload import Payload
-from DialogFlowPy.QuickReplies import QuickReplies
-from DialogFlowPy.SimpleResponse import SimpleResponse
-from DialogFlowPy.SimpleResponses import SimpleResponses
-from DialogFlowPy.Suggestion import Suggestion
-from DialogFlowPy.Suggestions import Suggestions
-from DialogFlowPy.TableCard import TableCard
-from DialogFlowPy.TableCardRow import TableCardRow
-from DialogFlowPy.Text import Text
+from .Entity import Entity
+from . import PlatformEnum, ImageDisplayOptions, ResponseMediaType
+from .BasicCard import BasicCard
+from .BrowseCarouselCard import BrowseCarouselCard
+from .BrowseCarouselCardItem import BrowseCarouselCardItem
+from .Button import Button
+from .Card import Card
+from .CarouselItem import CarouselItem
+from .CarouselSelect import CarouselSelect
+from .ColumnProperties import ColumnProperties
+from .Context import Context
+from .EventInput import EventInput
+from .GooglePayload import GooglePayload
+from .Image import Image
+from .LinkOutSuggestion import LinkOutSuggestion
+from .ListItem import ListItem
+from .ListSelect import ListSelect
+from .MediaContent import MediaContent
+from .MediaObject import MediaObject
+from .Message import Message
+from .Payload import Payload
+from .QuickReplies import QuickReplies
+from .SimpleResponse import SimpleResponse
+from .SimpleResponses import SimpleResponses
+from .Suggestion import Suggestion
+from .Suggestions import Suggestions
+from .TableCard import TableCard
+from .TableCardRow import TableCardRow
+from .Text import Text
 from GoogleActions import ImageDisplayOptions as GoogleImageDisplayOptions
 from google.auth import jwt
+from .SessionEntityType import SessionEntityType, EntityOverrideMode
 
 
 class DialogFlow(dict):
@@ -101,14 +102,14 @@ class DialogFlow(dict):
         {
           'rawInputs': [
             {
-              'query': 'query from DialogFlowPy.the user',
+              'query': 'query from the user',
               'inputType': 'KEYBOARD'
             }
           ],
           'arguments': [
             {
-              'rawText': 'query from DialogFlowPy.the user',
-              'textValue': 'query from DialogFlowPy.the user',
+              'rawText': 'query from the user',
+              'textValue': 'query from the user',
               'name': 'text'
             }
           ],
@@ -184,16 +185,16 @@ class DialogFlow(dict):
 
         self.create_payload_object = create_payload_object
         self._max_msg_length = 550
-        self['fulfillmentMessages']: List[Message] = []
+        self['fulfillmentMessages']: List[Message] = list()
         self['source'] = None
         self['followupEventInput'] = None
         self['fulfillmentText'] = ''
-
+        self['session_entity_types'] = list()
         self._user_given_name = ''
         self._user_family_name = ''
         self._user_email = ''
         self._user_verification_status = ''
-        self._user_storage = {}
+        self._user_storage = dict()
 
         if self.create_payload_object:
             self['payload'] = Payload('google', GooglePayload())
@@ -247,8 +248,6 @@ class DialogFlow(dict):
                         self._user_storage = literal_eval(self._user_storage)
 
                     if request_data_json.get('originalDetectIntentRequest').get('payload').get('user').get('idToken'):
-                        encoded_user_token: str = ''
-
                         import http.client
                         conn = http.client.HTTPSConnection("www.googleapis.com")
                         conn.request("GET", "/oauth2/v1/certs")
@@ -290,6 +289,9 @@ class DialogFlow(dict):
     @property
     def parameters(self):
         return self._parameters
+
+    def get_parameter(self, parameter_name: str):
+        return self._parameters.get(parameter_name)
 
     @property
     def user_storage(self):
@@ -356,6 +358,19 @@ class DialogFlow(dict):
                         self['outputContexts'].remove(context)
 
         return True
+
+    @property
+    def session_entity_types(self):
+        return self['session_entity_types']
+
+    @session_entity_types.setter
+    def session_entity_types(self, session_entity_types: List[SessionEntityType]):
+        self['session_entity_types'] = session_entity_types
+
+    def add_session_entity(self, entity_name: str, entity_overide_mode: EntityOverrideMode, entities: List[Entity]):
+        self['session_entity_types'].append(SessionEntityType(name=self._session_id + '/entityTypes/' + entity_name,
+                                                              entity_overide_mode=entity_overide_mode,
+                                                              entities=entities))
 
     # Followup_event_input functions
     @property

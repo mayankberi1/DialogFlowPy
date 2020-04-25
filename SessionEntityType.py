@@ -1,5 +1,5 @@
 from enum import Enum
-
+from typing import List
 from DialogFlowPy.Entity import Entity
 
 
@@ -29,9 +29,9 @@ class SessionEntityType(dict):
         Required. The collection of entities associated with this session entity type.
     """
 
-    def __init__(self, name: str, entity_overide_mode: EntityOverrideMode, entities: Entity) -> None:
+    def __init__(self, name: str, entity_overide_mode: EntityOverrideMode, entities: List[Entity]) -> None:
         super().__init__()
 
         self['name'] = name
-        self['entity_override_mode'] = entity_overide_mode
+        self['entity_override_mode'] = entity_overide_mode.value
         self['entities'] = entities
